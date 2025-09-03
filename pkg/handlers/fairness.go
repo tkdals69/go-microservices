@@ -1,11 +1,8 @@
 package handlers
 
-import (
     "net/http"
     "github.com/redis/go-redis/v9"
     "github.com/jmoiron/sqlx"
-    "github.com/go-chi/chi/v5"
-    "context"
 )
 
 type FairnessHandler struct {
@@ -32,7 +29,7 @@ func (h *FairnessHandler) CreateFairness(w http.ResponseWriter, r *http.Request)
     w.Write([]byte("Fairness created"))
 }
 
-func (h *FairnessHandler) RegisterRoutes(router *mux.Router) {
-    router.HandleFunc("/fairness", h.GetFairness).Methods(http.MethodGet)
-    router.HandleFunc("/fairness", h.CreateFairness).Methods(http.MethodPost)
+func (h *FairnessHandler) RegisterRoutes(router chi.Router) {
+    router.MethodFunc(http.MethodGet, "/fairness", h.GetFairness)
+    router.MethodFunc(http.MethodPost, "/fairness", h.CreateFairness)
 }
