@@ -2,7 +2,7 @@ package handlers
 
 import (
     "net/http"
-    "github.com/redis/v8"
+    "github.com/redis/go-redis/v9"
     "github.com/jmoiron/sqlx"
     "github.com/go-chi/chi/v5"
     "context"

@@ -1,11 +1,12 @@
 package cloud
 
 import (
-	"context"
-	"fmt"
-	"os"
-
-	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+    "context"
+    "fmt"
+    "io"
+    "bytes"
+    "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+    "github.com/Azure/azure-sdk-for-go/sdk/azcore/streaming"
 )
 
 type AzureAdapter struct {
