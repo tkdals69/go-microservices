@@ -4,6 +4,7 @@ import (
     "net/http"
     "github.com/redis/go-redis/v9"
     "github.com/jmoiron/sqlx"
+    "github.com/go-chi/chi/v5"
 )
 
 type FairnessHandler struct {
