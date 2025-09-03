@@ -2,7 +2,7 @@ package handlers
 
 import (
     "net/http"
-    "github.com/chi/v5"
+    "github.com/go-chi/chi/v5"
 )
 
 type GatewayHandler struct{}

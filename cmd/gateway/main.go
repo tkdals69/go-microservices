@@ -5,8 +5,8 @@ import (
     "net/http"
     "os"
 
-    "github.com/chi/v5"
-    "github.com/chi/v5/middleware"
+    "github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5/middleware"
     "your_project/pkg/config"
     "your_project/pkg/handlers"
     "your_project/pkg/observability"

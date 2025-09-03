@@ -5,7 +5,7 @@ import (
     "net/http"
     "os"
 
-    "github.com/chi/v5"
+    "github.com/go-chi/chi/v5"
     "github.com/tkdals69/go-microservices/pkg/config"
     "github.com/tkdals69/go-microservices/pkg/middleware"
     "github.com/tkdals69/go-microservices/pkg/observability"
