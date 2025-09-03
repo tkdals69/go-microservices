@@ -3,9 +3,13 @@ package main
 import (
     "log"
     "net/http"
-    "os"
-
-    "github.com/go-chi/chi/v5"
+        "log"
+        "net/http"
+        "github.com/go-chi/chi/v5"
+        "github.com/go-chi/chi/v5/middleware"
+        "github.com/tkdals69/go-microservices/pkg/config"
+        "github.com/tkdals69/go-microservices/pkg/handlers"
+        "github.com/tkdals69/go-microservices/pkg/observability"
     "github.com/go-chi/chi/v5/middleware"
     "github.com/tkdals69/go-microservices/pkg/config"
     "github.com/tkdals69/go-microservices/pkg/handlers"
