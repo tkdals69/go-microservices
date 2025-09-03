@@ -6,10 +6,10 @@ import (
     "os"
 
     "github.com/chi/v5"
-    "github.com/tkdals69/go-microservicesyourusername/go-microservices/pkg/config"
-    "github.com/tkdals69/go-microservicesyourusername/go-microservices/pkg/middleware"
-    "github.com/tkdals69/go-microservicesyourusername/go-microservices/pkg/observability"
-    "github.com/tkdals69/go-microservicesyourusername/go-microservices/pkg/handlers"
+    "github.com/tkdals69/go-microservices/pkg/config"
+    "github.com/tkdals69/go-microservices/pkg/middleware"
+    "github.com/tkdals69/go-microservices/pkg/observability"
+    "github.com/tkdals69/go-microservices/pkg/handlers"
 )
 
 func main() {

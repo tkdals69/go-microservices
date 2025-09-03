@@ -1,107 +1,46 @@
-# Go Microservices Project
+# LiveOps Progression & Fairness Guard
 
-This project is a collection of microservices built using Go. It follows a cloud-neutral architecture and adheres to the 12-factor app principles. The microservices are designed to be modular, scalable, and maintainable.
+- Author: tkdals69
+- Cloud: Azure (CLOUD=azure)
+- Go 1.22, chi, pgx, go-redis, prometheus
 
-## Project Structure
-
-```
-go-microservices
-├── cmd
-│   ├── gateway         # Gateway microservice
-│   ├── progression     # Progression microservice
-│   ├── leaderboard     # Leaderboard microservice
-│   └── fairness        # Fairness microservice
-├── pkg
-│   ├── config          # Configuration management
-│   ├── adapters        # Cloud, database, and cache adapters
-│   ├── middleware      # Middleware for security and observability
-│   ├── observability    # Health checks and metrics
-│   ├── handlers        # HTTP handlers for each microservice
-│   └── tests          # Unit and integration tests
-├── api                 # OpenAPI specifications
-├── .env                # Environment variables
-├── Makefile            # Build, run, and test commands
-├── README.md           # Project documentation
-├── LICENSE             # Licensing information
-├── go.mod              # Module dependencies
-├── go.sum              # Dependency checksums
-├── Dockerfile.gateway   # Docker configuration for gateway
-├── Dockerfile.progression # Docker configuration for progression
-├── Dockerfile.leaderboard # Docker configuration for leaderboard
-└── Dockerfile.fairness  # Docker configuration for fairness
+## 환경변수(.env 예시)
+```env
+CLOUD=azure
+ENV=dev
+PORT=8080
+HMAC_SECRET=change-me-32bytes-min
+DB_URL=postgres://liveops:STRONG_PASS@<pg-name>.postgres.database.azure.com:5432/liveops?sslmode=require
+REDIS_URL=rediss://:PRIMARY_KEY@<name>.redis.cache.windows.net:6380/0
+...
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- Go 1.22 or later
-- Docker (for containerization)
-- PostgreSQL (for database)
-- Redis (for caching)
-
-### Installation
-
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd go-microservices
-   ```
-
-2. Set up environment variables:
-   Create a `.env` file in the root directory and configure your environment variables.
-
-3. Build the project:
-   ```
-   make build
-   ```
-
-### Running the Services
-
-You can run each microservice individually using the following commands:
-
-- For Gateway:
-  ```
-  make run-gateway
-  ```
-
-- For Progression:
-  ```
-  make run-progression
-  ```
-
-- For Leaderboard:
-  ```
-  make run-leaderboard
-  ```
-
-- For Fairness:
-  ```
-  make run-fairness
-  ```
-
-### Testing
-
-To run the tests, use:
+## 실행
+```bash
+go mod tidy
+make build
+make run-gateway
+make run-progression
+make run-leaderboard
+make run-fairness
 ```
+
+## 테스트
+```bash
 make test
 ```
 
-### API Documentation
+## 샘플 이벤트 전송
+```bash
+BODY='{"type":"progression","playerId":"p1","ts":1730560000,"payload":{"deltaXp":10}}'
+SIG="sha256=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$HMAC_SECRET" -binary | xxd -p -c 256)"
+curl -i -X POST "http://127.0.0.1:${PORT:-8080}/events" \
+ -H "Content-Type: application/json" -H "X-Signature: $SIG" -H "Idempotency-Key: demo-1" -d "$BODY"
+```
 
-The API specifications are available in the `api/openapi.yaml` file. You can use tools like Swagger UI to visualize and interact with the API.
+## Kubernetes 배포
+- .env와 동일한 key=value로 Secret 생성
+- 운영은 External Secrets(ESO) 권장
 
-## Observability
-
-Each microservice exposes the following endpoints for observability:
-
-- `/healthz` - Health check endpoint
-- `/metrics` - Metrics endpoint for Prometheus
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or features.
+## 라이선스
+MIT

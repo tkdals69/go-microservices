@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/tkdals69/go-microservicesgo-chi/chi/v5"
-	"github.com/tkdals69/go-microservicesgo-chi/render"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 )
 
 type LeaderboardHandler struct{}
