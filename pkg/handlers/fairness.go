@@ -3,8 +3,8 @@ package handlers
 import (
     "net/http"
     "github.com/redis/v8"
-    "github.com/tkdals69/go-microservicesjmoiron/sqlx"
-    "github.com/tkdals69/go-microservicesgorilla/mux"
+    "github.com/jmoiron/sqlx"
+    "github.com/go-chi/chi/v5"
     "context"
 )
 

@@ -6,7 +6,7 @@ import (
     "log"
     "os"
 
-    _ "github.com/tkdals69/go-microserviceslib/pq" // PostgreSQL driver
+    _ "github.com/jackc/pgx/v5/stdlib" // PostgreSQL driver
 )
 
 type PostgresDB struct {

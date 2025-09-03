@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tkdals69/go-microservicesAzure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
 type AzureAdapter struct {
