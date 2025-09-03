@@ -4,6 +4,8 @@ import (
     "net/http"
     "net/http/httptest"
     "testing"
+    
+    "github.com/tkdals69/go-microservices/pkg/observability"
 )
 
 func TestHealthzEndpoint(t *testing.T) {
@@ -13,7 +15,7 @@ func TestHealthzEndpoint(t *testing.T) {
     }
 
     rr := httptest.NewRecorder()
-    handler := http.HandlerFunc(HealthzHandler) // Replace with actual handler
+    handler := http.HandlerFunc(observability.HealthCheck)
 
     handler.ServeHTTP(rr, req)
 
@@ -29,7 +31,7 @@ func TestMetricsEndpoint(t *testing.T) {
     }
 
     rr := httptest.NewRecorder()
-    handler := http.HandlerFunc(MetricsHandler) // Replace with actual handler
+    handler := observability.MetricsHandler()
 
     handler.ServeHTTP(rr, req)
 
