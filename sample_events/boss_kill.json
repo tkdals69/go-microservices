@@ -1,0 +1,10 @@
+{
+  "type": "boss_kill",
+  "playerId": "player_67890",
+  "ts": 1638360300,
+  "payload": {
+    "bossId": "dragon_lord",
+    "tier": 5,
+    "points": 2500
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "progression",
+  "playerId": "player_12345",
+  "ts": 1638360000,
+  "payload": {
+    "deltaXp": 150,
+    "activity": "quest_completion"
+  }
+}

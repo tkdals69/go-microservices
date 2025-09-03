@@ -1,39 +1,58 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
+	"log"
+	"net/http"
 
-    "github.com/go-chi/chi/v5"
-    "github.com/tkdals69/go-microservices/pkg/config"
-    "github.com/tkdals69/go-microservices/pkg/middleware"
-    "github.com/tkdals69/go-microservices/pkg/observability"
-    "github.com/tkdals69/go-microservices/pkg/handlers"
+	"github.com/go-chi/chi/v5"
+	"github.com/tkdals69/go-microservices/pkg/config"
+	"github.com/tkdals69/go-microservices/pkg/handlers"
+	"github.com/tkdals69/go-microservices/pkg/middleware"
+	"github.com/tkdals69/go-microservices/pkg/observability"
 )
 
 func main() {
-    cfg, err := config.LoadConfig()
-    if err != nil {
-        log.Fatalf("could not load config: %v", err)
-    }
+	cfg := config.Load()
 
-    r := chi.NewRouter()
+	r := chi.NewRouter()
 
-    r.Use(middleware.HMACMiddleware)
-    r.Use(middleware.IdempotencyMiddleware)
-    r.Use(middleware.RateLimitMiddleware)
+	// Initialize middlewares properly
+	hmacMw := middleware.NewHMACMiddleware(cfg.HMACSecret)
+	r.Use(hmacMw.Verify)
 
-    r.Get("/healthz", observability.HealthCheck)
-    r.Get("/metrics", observability.Metrics)
+	idempMw := middleware.NewIdempotencyKeyMiddleware()
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			idempMw.ServeHTTP(w, req, func(w http.ResponseWriter, r *http.Request) {
+				next.ServeHTTP(w, r)
+			})
+		})
+	})
 
-    r.Route("/fairness", func(r chi.Router) {
-        r.Get("/", handlers.FairnessHandler)
-        // Add more routes as needed
-    })
+	rl := middleware.NewRateLimiter(cfg.RateLimitMax, cfg.RateLimitMax*2)
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if rl.Allow() {
+				next.ServeHTTP(w, req)
+			} else {
+				http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+			}
+		})
+	})
 
-    log.Printf("Starting fairness service on port %s", cfg.Port)
-    if err := http.ListenAndServe(":"+cfg.Port, r); err != nil {
-        log.Fatalf("could not start server: %v", err)
-    }
+	r.Get("/healthz", observability.HealthCheck)
+	r.Get("/metrics", observability.MetricsHandler().ServeHTTP)
+
+	// Initialize fairness handler and register routes
+	fairnessHandler := handlers.NewFairnessHandler(nil, nil)
+	fairnessHandler.RegisterRoutes(r)
+
+	port := cfg.Port
+	if port == "" {
+		port = "8081"
+	}
+	log.Printf("Starting fairness service on port %s", port)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
+		log.Fatalf("could not start server: %v", err)
+	}
 }

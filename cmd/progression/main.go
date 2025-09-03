@@ -1,47 +1,73 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
+	"log"
+	"net/http"
 
-    "github.com/go-chi/chi/v5"
-    "github.com/tkdals69/go-microservices/pkg/config"
-    "github.com/tkdals69/go-microservices/pkg/middleware"
-    "github.com/tkdals69/go-microservices/pkg/observability"
-    "github.com/tkdals69/go-microservices/pkg/handlers"
+	"github.com/go-chi/chi/v5"
+	"github.com/tkdals69/go-microservices/pkg/config"
+	"github.com/tkdals69/go-microservices/pkg/handlers"
+	"github.com/tkdals69/go-microservices/pkg/middleware"
+	"github.com/tkdals69/go-microservices/pkg/observability"
 )
 
 func main() {
-    // Load configuration
-    cfg, err := config.LoadConfig()
-    if err != nil {
-        log.Fatalf("could not load config: %v", err)
-    }
+	// Load configuration
+	cfg := config.Load()
 
-    // Initialize router
-    r := chi.NewRouter()
+	// Initialize router
+	r := chi.NewRouter()
 
-    // Middleware
-    r.Use(middleware.HMACMiddleware)
-    r.Use(middleware.IdempotencyMiddleware)
-    r.Use(middleware.RateLimitMiddleware)
+	// Middleware
+	hmacMw := middleware.NewHMACMiddleware(cfg.HMACSecret)
+	r.Use(hmacMw.Verify)
 
-    // Health check endpoint
-    r.Get("/healthz", observability.HealthCheck)
+	idempMw := middleware.NewIdempotencyKeyMiddleware()
+	// chi 미들웨어 래퍼 필요시 별도 래핑 필요
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			idempMw.ServeHTTP(w, req, func(w http.ResponseWriter, r *http.Request) {
+				next.ServeHTTP(w, r)
+			})
+		})
+	})
 
-    // Metrics endpoint
-    r.Get("/metrics", observability.Metrics)
+	rl := middleware.NewRateLimiter(10, 20) // 값은 예시
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if rl.Allow() {
+				next.ServeHTTP(w, req)
+			} else {
+				http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+			}
+		})
+	})
 
-    // Progression routes
-    r.Route("/progression", func(r chi.Router) {
-        r.Get("/", handlers.GetProgression)
-        r.Post("/", handlers.CreateProgression)
-    })
+	// Health check endpoint
+	r.Get("/healthz", observability.HealthCheck)
 
-    // Start server
-    log.Printf("Starting progression service on port %s", cfg.Port)
-    if err := http.ListenAndServe(":"+cfg.Port, r); err != nil {
-        log.Fatalf("could not start server: %v", err)
-    }
+	// Metrics endpoint
+	r.Get("/metrics", observability.MetricsHandler().ServeHTTP)
+
+	// Progression routes
+	r.Route("/progression", func(r chi.Router) {
+		r.Get("/", handlers.GetProgression)
+		r.Post("/", handlers.CreateProgression)
+	})
+
+	// Reward routes
+	r.Route("/rewards", func(r chi.Router) {
+		r.Post("/claim", handlers.ClaimReward)
+	})
+
+	port := cfg.Port
+	if port == "" {
+		port = "8083"
+	}
+
+	// Start server
+	log.Printf("Starting progression service on port %s", port)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
+		log.Fatalf("could not start server: %v", err)
+	}
 }

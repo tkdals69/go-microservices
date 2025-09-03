@@ -1,0 +1,10 @@
+{
+  "type": "drop_claimed",
+  "playerId": "player_abcde",
+  "ts": 1638360600,
+  "payload": {
+    "dropId": "epic_sword_001",
+    "weight": 0.05,
+    "source": "raid_chest"
+  }
+}
