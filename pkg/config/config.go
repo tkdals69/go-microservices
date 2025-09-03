@@ -29,8 +29,8 @@ type Config struct {
 
 func Load() *Config {
     cloud := strings.ToLower(os.Getenv("CLOUD"))
-    if cloud != "aws" && cloud != "azure" {
-        log.Printf("[WARN] CLOUD 값이 잘못됨: %s, 기본 azure 사용", cloud)
+    if cloud != "azure" {
+        log.Printf("[WARN] CLOUD 값이 잘못됨: %s, azure만 지원", cloud)
         cloud = "azure"
     }
     env := os.Getenv("ENV")
