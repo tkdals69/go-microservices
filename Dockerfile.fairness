@@ -1,0 +1,20 @@
+FROM golang:1.22 AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+WORKDIR /app/cmd/fairness
+RUN go build -o fairness .
+
+FROM gcr.io/distroless/base
+
+COPY --from=builder /app/cmd/fairness/fairness /fairness
+
+ENV PORT=8080
+EXPOSE 8080
+
+CMD ["/fairness"]

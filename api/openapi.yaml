@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: LiveOps API
+  version: 0.1.0
+paths:
+  /events:
+    post:
+      summary: Ingest gameplay events
+      parameters:
+        - in: header
+          name: X-Signature
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '202':
+          description: Accepted
+        '208':
+          description: Duplicate
+        '401':
+          description: Bad signature
+  /leaderboard:
+    get:
+      parameters:
+        - in: query
+          name: window
+          schema:
+            type: string
+            enum: [daily,weekly,seasonal]
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: OK
+  /players/{playerId}/progress:
+    get:
+      parameters:
+        - in: path
+          name: playerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    Event:
+      type: object
+      required: [type, playerId, ts, payload]
+      properties:
+        type:
+          type: string
+          enum: [progression, boss_kill, drop_claimed]
+        playerId:
+          type: string
+        ts:
+          type: integer
+          format: int64
+        payload:
+          type: object
+          additionalProperties: true

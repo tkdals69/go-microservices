@@ -1,0 +1,18 @@
+{
+  "event_type": "sample_event",
+  "data": {
+    "user_id": "12345",
+    "action": "create",
+    "timestamp": "2023-10-01T12:00:00Z",
+    "details": {
+      "item_id": "abcde",
+      "item_name": "Sample Item",
+      "quantity": 1
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "source": "test",
+    "environment": "development"
+  }
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>클릭 게임 - LiveOps 데모</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>클릭 게임</h1>
+        <div class="game-area">
+            <div id="score">점수: <span id="scoreValue">0</span></div>
+            <button id="clickBtn">클릭!</button>
+            <div id="multiplier">현재 배율: x<span id="multiplierValue">1</span></div>
+        </div>
+
+        <div class="leaderboard">
+            <h2>리더보드</h2>
+            <div id="leaderboardList"></div>
+        </div>
+
+        <div id="status"></div>
+    </div>
+    <script src="/static/game.js"></script>
+</body>
+</html>
