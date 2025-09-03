@@ -7,9 +7,9 @@ import (
 
     "github.com/go-chi/chi/v5"
     "github.com/go-chi/chi/v5/middleware"
-    "your_project/pkg/config"
-    "your_project/pkg/handlers"
-    "your_project/pkg/observability"
+    "github.com/tkdals69/go-microservices/pkg/config"
+    "github.com/tkdals69/go-microservices/pkg/handlers"
+    "github.com/tkdals69/go-microservices/pkg/observability"
 )
 
 func main() {
