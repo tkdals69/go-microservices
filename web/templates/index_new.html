@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiveOps 게이밍 플랫폼</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1><i class="fas fa-gamepad"></i> LiveOps Platform</h1>
+        </div>
+        <div class="nav-menu">
+            <button class="nav-btn active" data-tab="dashboard">대시보드</button>
+            <button class="nav-btn" data-tab="games">게임</button>
+            <button class="nav-btn" data-tab="leaderboard">리더보드</button>
+            <button class="nav-btn" data-tab="progression">진행도</button>
+            <button class="nav-btn" data-tab="admin">모니터링</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- 대시보드 탭 -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="player-card">
+                    <h3><i class="fas fa-user"></i> 플레이어 정보</h3>
+                    <div class="player-info">
+                        <div class="player-stat">
+                            <span class="stat-label">플레이어 ID:</span>
+                            <span id="playerId">로딩중...</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">레벨:</span>
+                            <span id="playerLevel">1</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">현재 XP:</span>
+                            <span id="playerXP">0</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">전체 점수:</span>
+                            <span id="totalScore">0</span>
+                        </div>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-progress" id="xpProgress" style="width: 0%"></div>
+                        <span class="xp-text" id="xpText">0 / 100 XP</span>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <h3><i class="fas fa-chart-bar"></i> 게임 통계</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="gamesPlayed">0</div>
+                            <div class="stat-label">플레이한 게임</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="currentRank">-</div>
+                            <div class="stat-label">현재 순위</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalXPGained">0</div>
+                            <div class="stat-label">총 획득 XP</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="achievementsCount">0</div>
+                            <div class="stat-label">업적</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievements-card">
+                    <h3><i class="fas fa-trophy"></i> 최근 업적</h3>
+                    <div id="achievementsList" class="achievements-list">
+                        <div class="no-achievements">아직 획득한 업적이 없습니다</div>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <h3><i class="fas fa-shield-alt"></i> 계정 상태</h3>
+                    <div class="status-indicator">
+                        <div class="status-light green" id="fairnessStatus"></div>
+                        <span id="fairnessText">공정한 플레이</span>
+                    </div>
+                    <div class="recent-activity" id="recentActivity">
+                        <div class="activity-item">시스템 정상 작동 중</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 탭 -->
+        <div id="games" class="tab-content">
+            <div class="games-container">
+                <h2>게임 선택</h2>
+                <div class="games-grid">
+                    <div class="game-card" data-game="clicker">
+                        <div class="game-icon"><i class="fas fa-mouse-pointer"></i></div>
+                        <h3>클리커 게임</h3>
+                        <p>클릭해서 점수를 얻으세요!</p>
+                        <div class="game-stats">
+                            <span>XP: +10 per click</span>
+                        </div>
+                    </div>
+                    <div class="game-card" data-game="memory">
+                        <div class="game-icon"><i class="fas fa-brain"></i></div>
+                        <h3>메모리 게임</h3>
+                        <p>숫자 순서를 기억하세요!</p>
+                        <div class="game-stats">
+                            <span>XP: +50 per level</span>
+                        </div>
+                    </div>
+                    <div class="game-card" data-game="reaction">
+                        <div class="game-icon"><i class="fas fa-bolt"></i></div>
+                        <h3>반응속도 게임</h3>
+                        <p>빠르게 반응하세요!</p>
+                        <div class="game-stats">
+                            <span>XP: +25 per success</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 게임 플레이 영역 -->
+                <div id="gamePlayArea" class="game-play-area hidden">
+                    <div class="game-header">
+                        <h3 id="currentGameTitle">게임</h3>
+                        <button id="backToGames" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 게임 목록
+                        </button>
+                    </div>
+                    
+                    <!-- 클리커 게임 -->
+                    <div id="clickerGame" class="game-content hidden">
+                        <div class="clicker-stats">
+                            <div class="stat">점수: <span id="clickerScore">0</span></div>
+                            <div class="stat">배율: x<span id="clickerMultiplier">1</span></div>
+                            <div class="stat">클릭 수: <span id="clickCount">0</span></div>
+                        </div>
+                        <div class="clicker-area">
+                            <button id="mainClickBtn" class="click-button">
+                                <i class="fas fa-mouse-pointer"></i>
+                                클릭!
+                            </button>
+                        </div>
+                        <div class="upgrades">
+                            <button id="buyMultiplier" class="upgrade-btn" data-cost="100">
+                                <i class="fas fa-arrow-up"></i>
+                                배율 증가 (100점)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 메모리 게임 -->
+                    <div id="memoryGame" class="game-content hidden">
+                        <div class="memory-stats">
+                            <div class="stat">레벨: <span id="memoryLevel">1</span></div>
+                            <div class="stat">점수: <span id="memoryScore">0</span></div>
+                        </div>
+                        <div class="memory-display">
+                            <div id="memorySequence" class="memory-sequence"></div>
+                        </div>
+                        <div class="memory-input">
+                            <input type="text" id="memoryInput" placeholder="숫자 순서를 입력하세요">
+                            <button id="submitMemory" class="btn btn-primary">제출</button>
+                        </div>
+                        <button id="startMemory" class="btn btn-success">게임 시작</button>
+                    </div>
+
+                    <!-- 반응속도 게임 -->
+                    <div id="reactionGame" class="game-content hidden">
+                        <div class="reaction-stats">
+                            <div class="stat">최고 기록: <span id="bestTime">-</span>ms</div>
+                            <div class="stat">평균 시간: <span id="avgTime">-</span>ms</div>
+                        </div>
+                        <div class="reaction-area">
+                            <div id="reactionTarget" class="reaction-target hidden">
+                                클릭!
+                            </div>
+                            <div id="reactionMessage" class="reaction-message">
+                                준비되면 시작 버튼을 클릭하세요
+                            </div>
+                        </div>
+                        <button id="startReaction" class="btn btn-success">게임 시작</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 리더보드 탭 -->
+        <div id="leaderboard" class="tab-content">
+            <div class="leaderboard-container">
+                <h2>리더보드</h2>
+                <div class="leaderboard-filters">
+                    <button class="filter-btn active" data-type="global">전체</button>
+                    <button class="filter-btn" data-type="weekly">주간</button>
+                    <button class="filter-btn" data-type="monthly">월간</button>
+                </div>
+                <div class="leaderboard-table">
+                    <div class="leaderboard-header">
+                        <div>순위</div>
+                        <div>플레이어</div>
+                        <div>점수</div>
+                        <div>레벨</div>
+                        <div>마지막 플레이</div>
+                    </div>
+                    <div id="leaderboardBody" class="leaderboard-body">
+                        <div class="loading">로딩 중...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 진행도 탭 -->
+        <div id="progression" class="tab-content">
+            <div class="progression-container">
+                <h2>진행도 시스템</h2>
+                
+                <div class="progression-grid">
+                    <div class="level-card">
+                        <h3><i class="fas fa-star"></i> 레벨 진행도</h3>
+                        <div class="level-info">
+                            <div class="level-display">
+                                <span class="level-number" id="progLevel">1</span>
+                                <span class="level-label">레벨</span>
+                            </div>
+                            <div class="level-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progXPBar" style="width: 0%"></div>
+                                </div>
+                                <div class="progress-text" id="progXPText">0 / 100 XP</div>
+                            </div>
+                        </div>
+                        <div class="level-rewards">
+                            <h4>다음 레벨 보상:</h4>
+                            <div class="reward-list" id="nextRewards">
+                                <div class="reward-item">
+                                    <i class="fas fa-coins"></i> 100 골드
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="achievements-card">
+                        <h3><i class="fas fa-trophy"></i> 업적</h3>
+                        <div class="achievements-grid" id="achievementsGrid">
+                            <!-- 동적으로 생성 -->
+                        </div>
+                    </div>
+
+                    <div class="rewards-card">
+                        <h3><i class="fas fa-gift"></i> 보상 센터</h3>
+                        <div class="pending-rewards" id="pendingRewards">
+                            <div class="no-rewards">받을 수 있는 보상이 없습니다</div>
+                        </div>
+                        <button id="claimAllRewards" class="btn btn-primary hidden">
+                            <i class="fas fa-gift"></i> 모든 보상 받기
+                        </button>
+                    </div>
+
+                    <div class="stats-detail-card">
+                        <h3><i class="fas fa-chart-line"></i> 상세 통계</h3>
+                        <div class="stats-detail" id="detailedStats">
+                            <!-- 동적으로 생성 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모니터링 탭 -->
+        <div id="admin" class="tab-content">
+            <div class="admin-container">
+                <h2>시스템 모니터링</h2>
+                
+                <div class="monitoring-grid">
+                    <div class="service-status-card">
+                        <h3><i class="fas fa-server"></i> 서비스 상태</h3>
+                        <div class="service-list">
+                            <div class="service-item">
+                                <div class="service-name">Gateway</div>
+                                <div class="service-status" id="gatewayStatus">
+                                    <div class="status-dot checking"></div>
+                                    <span>확인중...</span>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-name">Leaderboard</div>
+                                <div class="service-status" id="leaderboardServiceStatus">
+                                    <div class="status-dot checking"></div>
+                                    <span>확인중...</span>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-name">Progression</div>
+                                <div class="service-status" id="progressionServiceStatus">
+                                    <div class="status-dot checking"></div>
+                                    <span>확인중...</span>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-name">Fairness</div>
+                                <div class="service-status" id="fairnessServiceStatus">
+                                    <div class="status-dot checking"></div>
+                                    <span>확인중...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fairness-monitoring-card">
+                        <h3><i class="fas fa-shield-alt"></i> 공정성 모니터링</h3>
+                        <div class="fairness-info">
+                            <div class="fairness-status" id="personalFairnessStatus">
+                                <div class="status-indicator green"></div>
+                                <span>정상 플레이</span>
+                            </div>
+                            <div class="fairness-details" id="fairnessDetails">
+                                <div class="detail-item">
+                                    <span class="detail-label">이벤트 빈도:</span>
+                                    <span class="detail-value" id="eventFrequency">정상</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">점수 패턴:</span>
+                                    <span class="detail-value" id="scorePattern">정상</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">마지막 체크:</span>
+                                    <span class="detail-value" id="lastFairnessCheck">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="event-log-card">
+                        <h3><i class="fas fa-list"></i> 이벤트 로그</h3>
+                        <div class="event-log" id="eventLog">
+                            <div class="log-item">시스템 시작됨</div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-card">
+                        <h3><i class="fas fa-chart-bar"></i> 실시간 메트릭</h3>
+                        <div class="metrics-grid" id="metricsGrid">
+                            <!-- 동적으로 생성 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 알림 시스템 -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>처리 중...</div>
+        </div>
+    </div>
+
+    <script src="/static/game.js"></script>
+</body>
+</html>

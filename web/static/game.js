@@ -2,22 +2,52 @@ class ClickGame {
     constructor() {
         this.score = 0;
         this.multiplier = 1;
+        this.playerId = null; // IP 기반 플레이어 ID
         this.clickBtn = document.getElementById('clickBtn');
         this.scoreValue = document.getElementById('scoreValue');
         this.multiplierValue = document.getElementById('multiplierValue');
         this.status = document.getElementById('status');
         this.leaderboardList = document.getElementById('leaderboardList');
         
+        // 백엔드 URL 설정 (환경에 따라 동적 설정)
+        this.backendUrl = this.getBackendUrl();
+        
         // 게임 초기화
         this.init();
     }
 
+    getBackendUrl() {
+        // 현재 호스트가 localhost가 아니면 같은 도메인의 8085 포트 사용
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:8085';
+        } else {
+            // Azure 환경에서는 Gateway 서비스의 FQDN 사용
+            return `http://gomicroservices-gateway.koreacentral.azurecontainer.io:8085`;
+        }
+    }
+
     async init() {
+        // 서버에서 클라이언트 IP를 가져와서 플레이어 ID로 사용
+        await this.initializePlayerId();
+        
         this.clickBtn.addEventListener('click', () => this.handleClick());
         
         // 10초마다 리더보드 갱신
         this.updateLeaderboard();
         setInterval(() => this.updateLeaderboard(), 10000);
+    }
+
+    async initializePlayerId() {
+        try {
+            const response = await fetch(`${this.backendUrl}/client-ip`);
+            const data = await response.json();
+            this.playerId = data.ip;
+            this.status.textContent = `플레이어 ID: ${this.playerId}`;
+        } catch (error) {
+            console.error('플레이어 ID 초기화 실패:', error);
+            this.playerId = 'unknown-' + Date.now(); // 폴백으로 타임스탬프 사용
+            this.status.textContent = `플레이어 ID: ${this.playerId} (오프라인)`;
+        }
     }
 
     async handleClick() {
@@ -40,7 +70,7 @@ class ClickGame {
         try {
             const event = {
                 type: "progression",
-                playerId: "player1", // 실제 구현시 로그인한 플레이어 ID 사용
+                playerId: this.playerId, // IP 기반 플레이어 ID 사용
                 ts: Math.floor(Date.now() / 1000),
                 payload: {
                     deltaXp: points
@@ -50,7 +80,7 @@ class ClickGame {
             // HMAC 서명 생성 (실제 구현시 서버사이드에서 처리해야 함)
             const sig = await this.generateHMAC(JSON.stringify(event));
 
-            const response = await fetch('http://localhost:8080/events', {
+            const response = await fetch(`${this.backendUrl}/events`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,7 +91,7 @@ class ClickGame {
             });
 
             if (response.status === 202) {
-                this.status.textContent = '점수 전송 성공!';
+                this.status.textContent = `점수 전송 성공! (${this.playerId})`;
             } else {
                 throw new Error(`서버 응답 ${response.status}`);
             }
@@ -73,14 +103,18 @@ class ClickGame {
 
     async updateLeaderboard() {
         try {
-            const response = await fetch('http://localhost:8080/leaderboard?window=daily&limit=10');
+            const response = await fetch(`${this.backendUrl}/leaderboard?window=daily&limit=10`);
             const data = await response.json();
             
-            this.leaderboardList.innerHTML = data.map((entry, index) => `
-                <div class="leaderboard-entry">
-                    ${index + 1}. ${entry.playerId}: ${entry.score}점
-                </div>
-            `).join('');
+            this.leaderboardList.innerHTML = data.map((entry, index) => {
+                const playerDisplay = entry.playerId === this.playerId 
+                    ? `${entry.playerId} (나)` 
+                    : entry.playerId;
+                return `
+                <div class="leaderboard-entry ${entry.playerId === this.playerId ? 'current-player' : ''}">
+                    ${index + 1}. ${playerDisplay}: ${entry.score}점
+                </div>`;
+            }).join('');
         } catch (error) {
             console.error('리더보드 갱신 실패:', error);
         }

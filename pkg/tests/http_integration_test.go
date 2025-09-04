@@ -40,8 +40,8 @@ func TestGatewayEventIngestion(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected 200, got %d", w.Code)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected 202, got %d", w.Code)
 	}
 
 	if !strings.Contains(w.Body.String(), "Event accepted") {

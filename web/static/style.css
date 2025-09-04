@@ -55,3 +55,10 @@
 .leaderboard-entry:last-child {
     border-bottom: none;
 }
+
+.leaderboard-entry.current-player {
+    background-color: #e8f5e8;
+    font-weight: bold;
+    border-left: 4px solid #4CAF50;
+    padding-left: 12px;
+}
